@@ -1,20 +1,24 @@
-FROM golang:1.24-alpine  AS build
-RUN apk add --no-cache git
+# syntax=docker/dockerfile:1
 
-WORKDIR /src
+# ---- Build stage ----
+FROM golang:1.27 AS build-stage
+
+WORKDIR /app
+
 COPY go.mod go.sum ./
 RUN go mod download
 
-COPY . .
-# disable cgo, target linux, static link
-RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 \
-    go build -ldflags="-s -w" -o server .
+COPY *.go ./
 
-FROM alpine:latest
-RUN apk add --no-cache ca-certificates
+RUN CGO_ENABLED=0 GOOS=linux go build -o /server
 
-WORKDIR /app
-COPY --from=build /src/server .
+# ---- Run stage ----
+FROM gcr.io/distroless/base-debian12 AS run-stage
+
+WORKDIR /
+
+COPY --from=build-stage /server /server
 
 EXPOSE 8080
-ENTRYPOINT ["./server"]
+
+ENTRYPOINT ["/server"]
