@@ -110,3 +110,7 @@ for examples of every response code (200, 204, 400, 404).
 ```bash
 terraform destroy -auto-approve
 ```
+
+## Load Testing and Observability
+
+Load test results and observability (Parts IV & V) are in the submitted PDF document (`hw05_explanation.pdf`), with code in the main `cs6650` repo under `hw05/`.
